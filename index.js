@@ -23,7 +23,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('VIDEO_PLAY', function (msg) {
-        io.emit('VIDEO_PLAY');
+        io.emit('VIDEO_PLAY', msg);
     });
 
     socket.on('VIDEO_PAUSE', function (msg) {

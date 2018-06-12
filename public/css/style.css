@@ -1,5 +1,6 @@
 body {
     font-family: 'Press Start 2P', cursive;
+    background-color: #000;
 }
 
 #version {
@@ -92,6 +93,5 @@ body {
 }
 
 .main-player {
-    background-color: #000;
     text-align: center;
 }

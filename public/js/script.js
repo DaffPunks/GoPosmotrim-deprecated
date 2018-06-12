@@ -32,7 +32,7 @@ function onYouTubePlayer() {
     player = new YT.Player('player', {
         height: '712',
         width: '1280',
-        videoId: 'M7lc1UVf-VE',
+        // videoId: 'M7lc1UVf-VE',
         events: {
             // 'onReady': onPlayerReady
             'onStateChange': onPlayerStateChange
@@ -74,7 +74,7 @@ socket.on('USERS_ONLINE', function(msg) {
 });
 
 socket.on('VIDEO_PLAY', function(msg) {
-    if (msg > currentTime + 1 || msg < currentTime - 1) {
+    if (msg > currentTime + 1 || msg < currentTime - 1 && msg != undefined) {
         // player.seekTo(msg, false);
         console.log('shet', currentTime, msg);
         currentTime = msg;

@@ -27,7 +27,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('VIDEO_PAUSE', function (msg) {
-        io.emit('VIDEO_PAUSE');
+        io.emit('VIDEO_PAUSE', msg);
     });
 
     socket.on('disconnect', function (reason) {

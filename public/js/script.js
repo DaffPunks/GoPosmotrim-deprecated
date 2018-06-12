@@ -48,7 +48,7 @@ function onPlayerStateChange(event) {
     }
     if (event.data === 3) {
         socket.emit('VIDEO_BUFFER');
-        player.pauseVideo();
+        // player.pauseVideo();
     }
 }
 

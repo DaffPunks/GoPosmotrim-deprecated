@@ -4,6 +4,8 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var port = process.env.PORT || 3000;
 
+var users = 0;
+
 app.use(express.static('public'));
 
 app.get('/', function (req, res) {
@@ -13,8 +15,24 @@ app.get('/', function (req, res) {
 io.on('connection', function (socket) {
     console.log('user connected');
 
-    socket.on('chat message', function (msg) {
-        io.emit('chat message', msg);
+    users++;
+    io.emit('USERS_ONLINE', users);
+
+    socket.on('VIDEO_NEW', function (msg) {
+        io.emit('VIDEO_NEW', msg);
+    });
+
+    socket.on('VIDEO_PLAY', function (msg) {
+        io.emit('VIDEO_PLAY');
+    });
+
+    socket.on('VIDEO_PAUSE', function (msg) {
+        io.emit('VIDEO_PAUSE');
+    });
+
+    socket.on('disconnect', function (reason) {
+        users--;
+        io.emit('USERS_ONLINE', users);
     });
 });
 

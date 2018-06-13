@@ -14,6 +14,7 @@ $(document).ready( function() {
     loadPlayer();
 
     $(document).on('submit', '.header-form form', OnVideoUrlSubmit);
+    $('.main-list-toggle').click(showHideUserlist);
 });
 
 function loadPlayer() {
@@ -123,10 +124,10 @@ function OnVideoNew(msg) {
 }
 
 function OnUsersOnline(msg) {
-    $('.main-list').empty();
+    $('.main-list-wrap').empty();
     msg.forEach(function (item) {
         var isMe = item.id == userID ? 'selected' : '';
-        $('.main-list').append(
+        $('.main-list-wrap').append(
             '<div class="main-list-user ' + isMe + '">' +
             '<div class="main-user-name">' + item.id + '</div>' +
             '<div class="main-user-time">' + item.time + '</div>' +
@@ -168,4 +169,8 @@ function OnVideoUrlSubmit() {
     socket.emit('VIDEO_NEW', url);
 
     return false;
+}
+
+function showHideUserlist() {
+    $('.main-list').toggleClass('hidden');
 }

@@ -5,6 +5,7 @@ var io = require('socket.io')(http);
 var port = process.env.PORT || 3000;
 
 var users = 0;
+var sentHolder = {};
 
 app.use(express.static('public'));
 
@@ -13,7 +14,12 @@ app.get('/', function (req, res) {
 });
 
 io.on('connection', function (socket) {
-    console.log('user connected');
+    var address = socket.conn.remoteAddress;
+    console.log('New connection from ' + address);
+
+    socket.join(socket.id);
+
+    io.in(socket.id).emit('USER_ID', {id: socket.id, address: address});
 
     users++;
     io.emit('USERS_ONLINE', users);
@@ -23,11 +29,11 @@ io.on('connection', function (socket) {
     });
 
     socket.on('VIDEO_PLAY', function (msg) {
-        io.emit('VIDEO_PLAY', msg);
+        socket.broadcast.emit('VIDEO_PLAY', msg);
     });
 
     socket.on('VIDEO_PAUSE', function (msg) {
-        io.emit('VIDEO_PAUSE', msg);
+        socket.broadcast.emit('VIDEO_PAUSE', msg);
     });
 
     socket.on('disconnect', function (reason) {

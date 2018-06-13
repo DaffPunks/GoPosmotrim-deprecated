@@ -2,7 +2,9 @@ var player,
     socket = io(),
     currentTime = 0,
     newTime,
-    lastAction = 0;
+    lastAction = 0,
+    userID,
+    recievedEvent = false;
 
 $(document).ready( function() {
     console.log( "ready!" );
@@ -22,9 +24,7 @@ function loadPlayer() {
         };
 
     } else {
-
         onYouTubePlayer();
-
     }
 }
 
@@ -32,7 +32,8 @@ function onYouTubePlayer() {
     player = new YT.Player('player', {
         height: '712',
         width: '1280',
-        // videoId: 'M7lc1UVf-VE',
+        videoId: 'M7lc1UVf-VE',
+        // playerVars: { 'autoplay': 0 },
         events: {
             // 'onReady': onPlayerReady
             'onStateChange': onPlayerStateChange
@@ -41,31 +42,46 @@ function onYouTubePlayer() {
 }
 
 function onPlayerStateChange(event) {
-    console.log('Player', event.data);
+    console.log('Player', event.data, recievedEvent);
 
-    if (event.data === 1) {
-        newTime = Math.round(player.getCurrentTime());
-        console.log('new', newTime);
-        socket.emit('VIDEO_PLAY', newTime);
-    }
-    if (event.data === 2) {
-        currentTime = Math.round(player.getCurrentTime());
-        console.log('cur', currentTime, lastAction);
-        socket.emit('VIDEO_PAUSE');
-    }
-    if (event.data === 3) {
-        socket.emit('VIDEO_BUFFER');
-        // player.pauseVideo();
+    if (!recievedEvent) {
+        switch (event.data) {
+            case 1: {
+                newTime = player.getCurrentTime().toFixed(2);
+                socket.emit('VIDEO_PLAY', newTime);
+                break;
+            }
+            case 2: {
+                currentTime = Math.round(player.getCurrentTime());
+                socket.emit('VIDEO_PAUSE');
+                break;
+            }
+            case 3: {
+                socket.emit('VIDEO_BUFFER');
+                break;
+            }
+        }
+    } else {
+        switch (event.data) {
+            case 1:
+            case 2: {
+                recievedEvent = false;
+                break;
+            }
+        }
     }
 
     lastAction = event.data;
 }
 
+/**
+ *  Socket Events
+ **/
 socket.on('VIDEO_NEW', function(msg) {
     if (typeof(player) !== 'undefined') {
         currentTime = 0;
-        player.cueVideoById(msg);
-        player.playVideo();
+        player.loadVideoById(msg);
+        // player.playVideo();
     }
 });
 
@@ -74,19 +90,26 @@ socket.on('USERS_ONLINE', function(msg) {
 });
 
 socket.on('VIDEO_PLAY', function(msg) {
-    if (msg > currentTime + 1 || msg < currentTime - 1 && msg != undefined) {
-        // player.seekTo(msg, false);
-        console.log('shet', currentTime, msg);
-        currentTime = msg;
-        player.seekTo(msg, true);
-    } else {
-        console.log('bett', currentTime, msg);
-    }
+    recievedEvent = true;
+
+    console.log('on VIDEO_PLAY', msg);
+
+    currentTime = msg;
+    player.seekTo(msg, true);
+
     player.playVideo();
 });
 
 socket.on('VIDEO_PAUSE', function(msg) {
-    player.pauseVideo();
+    recievedEvent = true;
+    player.pauseVideo(msg);
+});
+
+socket.on('USER_ID', function(msg) {
+    userID = msg.id;
+    $('#version span').text(userID);
+
+    console.log('ASD', msg);
 });
 
 $(document).on('submit', '.header-form form', function() {

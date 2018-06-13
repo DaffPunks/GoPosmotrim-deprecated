@@ -20,6 +20,7 @@ io.on('connection', function (socket) {
 
     userList.push({id: socket.id, time: 0});
     console.log('Users', userList);
+    console.log('User 1', userList[0]);
 
     socket.join(socket.id);
 

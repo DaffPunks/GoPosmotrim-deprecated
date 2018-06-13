@@ -5,16 +5,11 @@ var player,
     lastAction = 0,
     userID,
     recievedEvent = false,
-    videoID = 'CWcDCfyGgtk',
+    videoID = '',
     startTime = 0;
 
 $(document).ready( function() {
     console.log("ready!");
-
-    socket = io();
-    socket.on('VIDEO_INIT', OnVideoInit);
-    socket.on('USERS_ONLINE', OnUsersOnline);
-    socket.on('USER_ID', OnUserID);
 
     loadPlayer();
 
@@ -39,6 +34,7 @@ function loadPlayer() {
 }
 
 function onYouTubePlayer() {
+    console.log('PLAYER_INIT');
     player = new YT.Player('player', {
         height: '712',
         width: '1280',
@@ -52,9 +48,14 @@ function onYouTubePlayer() {
 }
 
 function onPlayerReady() {
+    socket = io();
+    socket.on('VIDEO_INIT', OnVideoInit);
+    socket.on('USERS_ONLINE', OnUsersOnline);
+    socket.on('USER_ID', OnUserID);
     socket.on('VIDEO_NEW', OnVideoNew);
     socket.on('VIDEO_PLAY', OnVideoPlay);
     socket.on('VIDEO_PAUSE', OnVideoPause);
+
     setInterval(function () {
         if (typeof(player) !== 'undefined') {
             if (player.getPlayerState() == 1) {
@@ -101,10 +102,14 @@ function onPlayerStateChange(event) {
  *  Socket Events
  **/
 function OnVideoInit(msg) {
-    console.log('VIDEO_INIT');
+    console.log('VIDEO_INIT', msg);
 
     videoID = msg.url;
     startTime = msg.time;
+
+    player.loadVideoById(videoID, startTime);
+    player.pauseVideo();
+    // player.seekTo(startTime);
 }
 
 function OnVideoNew(msg) {
@@ -135,7 +140,7 @@ function OnUsersOnline(msg) {
 function OnVideoPlay(msg) {
     recievedEvent = true;
 
-    console.log('on VIDEO_PLAY', msg);
+    console.log('VIDEO_PLAY', msg);
 
     currentTime = msg;
     player.seekTo(msg, true);

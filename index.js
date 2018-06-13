@@ -29,7 +29,7 @@ io.on('connection', function (socket) {
     // Sending user and video data
     io.in(socket.id).emit('USER_ID', {id: socket.id, address: address});
     io.emit('USERS_ONLINE', userList);
-    io.emit('VIDEO_INIT', {url: videoUrl, time: userList[0].time});
+    io.in(socket.id).emit('VIDEO_INIT', {url: videoUrl, time: userList[0].time});
 
     socket.on('VIDEO_NEW', (msg) => {
         videoUrl = msg;

@@ -108,7 +108,7 @@ function OnVideoInit(msg) {
     startTime = msg.time;
 
     player.loadVideoById(videoID, startTime);
-    player.pauseVideo();
+    // player.pauseVideo();
     // player.seekTo(startTime);
 }
 

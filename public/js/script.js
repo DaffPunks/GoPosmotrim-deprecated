@@ -1,17 +1,24 @@
 var player,
-    socket = io(),
+    socket,
     currentTime = 0,
     newTime,
     lastAction = 0,
     userID,
     recievedEvent = false,
-    videoID = 'M7lc1UVf-VE',
-    startTime = 0,
-    playerReady = false;
+    videoID = 'CWcDCfyGgtk',
+    startTime = 0;
 
 $(document).ready( function() {
-    console.log( "ready!" );
+    console.log("ready!");
+
+    socket = io();
+    socket.on('VIDEO_INIT', OnVideoInit);
+    socket.on('USERS_ONLINE', OnUsersOnline);
+    socket.on('USER_ID', OnUserID);
+
     loadPlayer();
+
+    $(document).on('submit', '.header-form form', OnVideoUrlSubmit);
 });
 
 function loadPlayer() {
@@ -45,8 +52,9 @@ function onYouTubePlayer() {
 }
 
 function onPlayerReady() {
-    playerReady = true;
-
+    socket.on('VIDEO_NEW', OnVideoNew);
+    socket.on('VIDEO_PLAY', OnVideoPlay);
+    socket.on('VIDEO_PAUSE', OnVideoPause);
     setInterval(function () {
         if (typeof(player) !== 'undefined') {
             if (player.getPlayerState() == 1) {
@@ -92,20 +100,14 @@ function onPlayerStateChange(event) {
 /**
  *  Socket Events
  **/
-socket.on('VIDEO_INIT', function(msg) {
-    if (playerReady) {
-        currentTime = 0;
+function OnVideoInit(msg) {
+    console.log('VIDEO_INIT');
 
-        player.loadVideoById(msg.url);
-        player.seekTo(10, msg.time);
-        player.pauseVideo();
-    } else {
-        videoID = msg.url;
-        startTime = msg.time;
-    }
-});
+    videoID = msg.url;
+    startTime = msg.time;
+}
 
-socket.on('VIDEO_NEW', function(msg) {
+function OnVideoNew(msg) {
     if (typeof(player) !== 'undefined') {
         currentTime = 0;
         player.loadVideoById(msg);
@@ -113,9 +115,9 @@ socket.on('VIDEO_NEW', function(msg) {
     } else {
         videoID = msg;
     }
-});
+}
 
-socket.on('USERS_ONLINE', function(msg) {
+function OnUsersOnline(msg) {
     $('.main-list').empty();
     msg.forEach(function (item) {
         var isMe = item.id == userID ? 'selected' : '';
@@ -128,9 +130,9 @@ socket.on('USERS_ONLINE', function(msg) {
     });
     console.log(msg);
     $('.header-online-num').text(msg.length);
-});
+}
 
-socket.on('VIDEO_PLAY', function(msg) {
+function OnVideoPlay(msg) {
     recievedEvent = true;
 
     console.log('on VIDEO_PLAY', msg);
@@ -139,26 +141,26 @@ socket.on('VIDEO_PLAY', function(msg) {
     player.seekTo(msg, true);
 
     player.playVideo();
-});
+}
 
-socket.on('VIDEO_PAUSE', function(msg) {
+function OnVideoPause(msg) {
     recievedEvent = true;
     player.pauseVideo(msg);
-});
+}
 
-socket.on('USER_ID', function(msg) {
+function OnUserID(msg) {
     userID = msg.id;
     $('#version span').text(userID);
 
     console.log('ASD', msg);
-});
+}
 
-$(document).on('submit', '.header-form form', function() {
+function OnVideoUrlSubmit() {
 
     var url = $('.header-search').val();
     url = url.split('=')[1];
-    
+
     socket.emit('VIDEO_NEW', url);
 
     return false;
-});
+}

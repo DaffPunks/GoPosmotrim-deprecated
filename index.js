@@ -33,6 +33,10 @@ io.on('connection', function (socket) {
 
     socket.on('VIDEO_NEW', (msg) => {
         videoUrl = msg;
+        userList = userList.map((item) => {
+            item.time = 0;
+            return item;
+        });
         io.emit('VIDEO_NEW', msg);
     });
 

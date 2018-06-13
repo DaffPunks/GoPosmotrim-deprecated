@@ -4,7 +4,10 @@ var player,
     newTime,
     lastAction = 0,
     userID,
-    recievedEvent = false;
+    recievedEvent = false,
+    videoID = 'M7lc1UVf-VE',
+    startTime = 0,
+    playerReady = false;
 
 $(document).ready( function() {
     console.log( "ready!" );
@@ -32,8 +35,8 @@ function onYouTubePlayer() {
     player = new YT.Player('player', {
         height: '712',
         width: '1280',
-        videoId: 'M7lc1UVf-VE',
-        // playerVars: { 'autoplay': 0 },
+        videoId: videoID,
+        playerVars: { autoplay: 1, start: startTime },
         events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
@@ -42,6 +45,8 @@ function onYouTubePlayer() {
 }
 
 function onPlayerReady() {
+    playerReady = true;
+
     setInterval(function () {
         if (typeof(player) !== 'undefined') {
             if (player.getPlayerState() == 1) {
@@ -87,11 +92,26 @@ function onPlayerStateChange(event) {
 /**
  *  Socket Events
  **/
+socket.on('VIDEO_INIT', function(msg) {
+    if (playerReady) {
+        currentTime = 0;
+
+        player.loadVideoById(msg.url);
+        player.seekTo(10, msg.time);
+        player.pauseVideo();
+    } else {
+        videoID = msg.url;
+        startTime = msg.time;
+    }
+});
+
 socket.on('VIDEO_NEW', function(msg) {
     if (typeof(player) !== 'undefined') {
         currentTime = 0;
         player.loadVideoById(msg);
         // player.playVideo();
+    } else {
+        videoID = msg;
     }
 });
 

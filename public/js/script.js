@@ -35,10 +35,20 @@ function onYouTubePlayer() {
         videoId: 'M7lc1UVf-VE',
         // playerVars: { 'autoplay': 0 },
         events: {
-            // 'onReady': onPlayerReady
+            'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
         }
     });
+}
+
+function onPlayerReady() {
+    setInterval(function () {
+        if (typeof(player) !== 'undefined') {
+            if (player.getPlayerState() == 1) {
+                socket.emit('VIDEO_TIME', player.getCurrentTime().toFixed(0));
+            }
+        }
+    }, 1000);
 }
 
 function onPlayerStateChange(event) {
@@ -86,7 +96,18 @@ socket.on('VIDEO_NEW', function(msg) {
 });
 
 socket.on('USERS_ONLINE', function(msg) {
-    $('.header-online-num').text(msg);
+    $('.main-list').empty();
+    msg.forEach(function (item) {
+        var isMe = item.id == userID ? 'selected' : '';
+        $('.main-list').append(
+            '<div class="main-list-user ' + isMe + '">' +
+            '<div class="main-user-name">' + item.id + '</div>' +
+            '<div class="main-user-time">' + item.time + '</div>' +
+            '</div>'
+        );
+    });
+    console.log(msg);
+    $('.header-online-num').text(msg.length);
 });
 
 socket.on('VIDEO_PLAY', function(msg) {

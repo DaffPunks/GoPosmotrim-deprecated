@@ -4,8 +4,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var port = process.env.PORT || 3000;
 
-var users = 0;
-var sentHolder = {};
+var userList = [];
 
 app.use(express.static('public'));
 
@@ -17,15 +16,28 @@ io.on('connection', function (socket) {
     var address = socket.conn.remoteAddress;
     console.log('New connection from ' + address);
 
+    userList.push({id: socket.id, time: 0});
+    console.log('Users', userList);
+
     socket.join(socket.id);
 
     io.in(socket.id).emit('USER_ID', {id: socket.id, address: address});
 
-    users++;
-    io.emit('USERS_ONLINE', users);
+    io.emit('USERS_ONLINE', userList);
 
     socket.on('VIDEO_NEW', function (msg) {
         io.emit('VIDEO_NEW', msg);
+    });
+
+    socket.on('VIDEO_TIME', function (msg) {
+        userList = userList.map((item) => {
+            if (item.id == socket.id) {
+                item.time = msg;
+            }
+            return item;
+        });
+
+        io.emit('USERS_ONLINE', userList);
     });
 
     socket.on('VIDEO_PLAY', function (msg) {
@@ -37,8 +49,9 @@ io.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function (reason) {
-        users--;
-        io.emit('USERS_ONLINE', users);
+        userList = userList.filter((item) => item.id != socket.id);
+        console.log('Users', userList);
+        io.emit('USERS_ONLINE', userList);
     });
 });
 

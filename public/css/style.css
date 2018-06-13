@@ -95,3 +95,25 @@ body {
 .main-player {
     text-align: center;
 }
+
+.main-list {
+    position: absolute;
+    height: 300px;
+    width: 15%;
+    top: 85px;
+    right: 0;
+    background-color: rgb(17,17,17);
+    color: white;
+    font-size: 10px;
+}
+
+.main-list-user {
+    padding: 20px 10px 0 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-list-user.selected {
+    color: green;
+}

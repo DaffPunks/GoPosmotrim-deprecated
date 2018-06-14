@@ -14,7 +14,7 @@ $(document).ready( function() {
     loadPlayer();
 
     $(document).on('submit', '.header-form form', OnVideoUrlSubmit);
-    $('.main-list-toggle').click(showHideUserlist);
+    $('.main-list-toggle').click(showHideUserList);
 });
 
 function loadPlayer() {
@@ -40,7 +40,7 @@ function onYouTubePlayer() {
         height: '712',
         width: '1280',
         videoId: videoID,
-        playerVars: { autoplay: 1, start: startTime },
+        playerVars: { autoplay: 1, start: startTime, rel: 0 },
         events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
@@ -96,6 +96,11 @@ function onPlayerStateChange(event) {
         }
     }
 
+    var data = player.getVideoData();
+    console.log(player.getVideoData());
+    $('.main-title').text(data.title);
+    $('.main-subtitle').text(data.author);
+
     lastAction = event.data;
 }
 
@@ -127,10 +132,16 @@ function OnUsersOnline(msg) {
     $('.main-list-wrap').empty();
     msg.forEach(function (item) {
         var isMe = item.id == userID ? 'selected' : '';
+        var minutes = (item.time / 60).toString().split('.')[0];
+        var seconds = item.time % 60 < 10 ? '0' + item.time % 60 : item.time % 60;
+        var name = item.id.slice(0, 5);
+
+        console.log(item.time, minutes, seconds);
+
         $('.main-list-wrap').append(
             '<div class="main-list-user ' + isMe + '">' +
-            '<div class="main-user-name">' + item.id + '</div>' +
-            '<div class="main-user-time">' + item.time + '</div>' +
+            '<div class="main-user-name">' + name + '</div>' +
+            '<div class="main-user-time">' + minutes + ':' + seconds + '</div>' +
             '</div>'
         );
     });
@@ -164,13 +175,26 @@ function OnUserID(msg) {
 function OnVideoUrlSubmit() {
 
     var url = $('.header-search').val();
-    url = url.split('=')[1];
+    var ID = YouTubeGetID(url);
 
-    socket.emit('VIDEO_NEW', url);
+    socket.emit('VIDEO_NEW', ID);
 
     return false;
 }
 
-function showHideUserlist() {
+function showHideUserList() {
     $('.main-list').toggleClass('hidden');
+}
+
+function YouTubeGetID(url){
+    var ID = '';
+    url = url.replace(/(>|<)/gi,'').split(/(vi\/|v=|\/v\/|youtu\.be\/|\/embed\/)/);
+    if(url[2] !== undefined) {
+        ID = url[2].split(/[^0-9a-z_\-]/i);
+        ID = ID[0];
+    }
+    else {
+        ID = url;
+    }
+    return ID;
 }

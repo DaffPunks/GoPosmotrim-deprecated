@@ -1,6 +1,7 @@
 body {
     font-family: 'Press Start 2P', cursive;
     background-color: #000;
+    overflow-x: hidden;
 }
 
 #version {
@@ -59,7 +60,7 @@ body {
 .header-search {
     background-color: transparent;
     border: none;
-    width: 100%;
+    width: calc(100% - 49px);
     padding: 15px;
     margin: 11px 0 11px 20px;
     color: white;
@@ -96,6 +97,20 @@ body {
 
 .main-player {
     text-align: center;
+}
+
+.main-title-wrap {
+    width: 1260px;
+    margin: auto;
+    text-align: left;
+    color: white;
+    padding: 10px 0;
+    line-height: 1.4;
+    font-size: 16px;
+}
+
+.main-subtitle {
+    font-size: 12px;
 }
 
 .main-list {
